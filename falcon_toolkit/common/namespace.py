@@ -13,10 +13,7 @@ class FalconRecursiveNamespace:
 
     @staticmethod
     def _map_entry(entry):
-        if isinstance(entry, dict):
-            return FalconRecursiveNamespace(**entry)
-
-        return entry
+        return FalconRecursiveNamespace(**entry) if isinstance(entry, dict) else entry
 
     def __init__(self, **kwargs):
         """Initialise a Falcon namespace, optionally with a pre-created dictionary."""

@@ -261,15 +261,12 @@ class RTRPrompt(Cmd):
                 continue
 
             if 'base_command' in device and device['base_command'] == 'pwd':
-                # On initial connection, the pwd pseudo-command will be run
-                # to reset the path back to the root and echo it to stdout
-                stdout = device['stdout']
-                return stdout
-
+                return device['stdout']
             # Something weird has happened in this case, so just return an OS-dependant root
             self.perror(
-                Fore.RED + "A connected device does not have a base_command == pwd" + Fore.RESET
+                f"{Fore.RED}A connected device does not have a base_command == pwd{Fore.RESET}"
             )
+
 
         if first_queued_root_path:
             return first_queued_root_path
@@ -350,15 +347,11 @@ class RTRPrompt(Cmd):
 
         self.last_batch_get_completed_uploads = 0
 
-        # We first iterate over every GetFile to see whether we have the relevant device's name
-        # cached in memory. If we do not, we'll try to get that information in batch from the
-        # Hosts API before we attempt to download anything.
-        aids_without_hostnames: List[str] = []
-        for get_file in get_files:
-            if get_file.device_id not in self.device_data:
-                aids_without_hostnames.append(get_file.device_id)
-
-        if aids_without_hostnames:
+        if aids_without_hostnames := [
+            get_file.device_id
+            for get_file in get_files
+            if get_file.device_id not in self.device_data
+        ]:
             self.device_data.update(
                 self.client.hosts.get_device_data(device_ids=aids_without_hostnames),
             )
@@ -370,9 +363,7 @@ class RTRPrompt(Cmd):
             # communicating with the cloud, so we assume we cannot get a name.
             hostname = "NO-HOSTNAME"
 
-            # Attempt to get this device's name from the data cached in memory
-            device_data = self.device_data.get(get_file.device_id)
-            if device_data:
+            if device_data := self.device_data.get(get_file.device_id):
                 hostname = device_data.get("hostname", "NO-HOSTNAME")
 
             self.poutput(
@@ -430,10 +421,10 @@ class RTRPrompt(Cmd):
                 timeout=self.timeout,
             )
 
-        printed_first = False
         batch_result_count = len(batch_results.keys())
         outputs: Optional[Tuple[Optional[str], Optional[str]]] = None
         error_msg_set = set()
+        printed_first = False
         for aid, batch_result in batch_results.items():
             complete = batch_result['complete']
             stdout = batch_result['stdout']
@@ -469,10 +460,10 @@ class RTRPrompt(Cmd):
 
         if error_msg_set:
             self.poutput(
-                Fore.RED +
-                "At least one error was detected. Check the log file for full details."
+                f"{Fore.RED}At least one error was detected. Check the log file for full details."
             )
-            self.poutput(Fore.WHITE + "List of errors detected:")
+
+            self.poutput(f"{Fore.WHITE}List of errors detected:")
             for err in error_msg_set:
                 self.poutput(f'-> {Style.DIM}{err}')
 
@@ -487,10 +478,7 @@ class RTRPrompt(Cmd):
     @with_argparser(PARSERS.cat, preserve_quotes=True)
     def do_cat(self, args):
         """Read a file from disk and display as ASCII or hex."""
-        if args.show_hex:
-            command = f'cat {args.file} -ShowHex'
-        else:
-            command = f'cat {args.file}'
+        command = f'cat {args.file} -ShowHex' if args.show_hex else f'cat {args.file}'
         self.send_generic_command(command)
 
     @with_argparser(PARSERS.cd, preserve_quotes=True)
@@ -552,9 +540,15 @@ class RTRPrompt(Cmd):
             )
 
             self.poutput(
-                Style.BRIGHT + "Script length: " + Style.RESET_ALL +
-                str(script['size']) + " bytes"
+                (
+                    (
+                        f"{Style.BRIGHT}Script length: {Style.RESET_ALL}"
+                        + str(script['size'])
+                    )
+                    + " bytes"
+                )
             )
+
             if 'description' in script:
                 self.poutput(
                     Style.RESET_ALL + script['description']
@@ -645,10 +639,13 @@ class RTRPrompt(Cmd):
             if not batch_get_cmd_req_obj.batch_get_cmd_req_id:
                 continue
             self.last_batch_get_cmd_req_ids.append(batch_get_cmd_req_obj.batch_get_cmd_req_id)
-            resources.update(batch_get_cmd_req_obj.devices)
+            resources |= batch_get_cmd_req_obj.devices
 
         if not resources:
-            self.perror(Fore.RED + "The requested file does not exist on any connected hosts")
+            self.perror(
+                f"{Fore.RED}The requested file does not exist on any connected hosts"
+            )
+
             return
 
         self.poutput(f"{Fore.BLUE}Initialised batch get requests with IDs:{Fore.RESET}")
@@ -674,7 +671,7 @@ class RTRPrompt(Cmd):
             successful = bool(stdout and not queued)
 
             if queued:
-                stdout = "[QUEUED] " + stdout
+                stdout = f"[QUEUED] {stdout}"
 
             self.write_result_row(
                 command="batch_get",
@@ -829,11 +826,7 @@ class RTRPrompt(Cmd):
     @with_argparser(PARSERS.netstat, preserve_quotes=True)
     def do_netstat(self, args):
         """Display network statistics and active connections."""
-        if args.routing_info:
-            command = "netstat -nr"
-        else:
-            command = "netstat"
-
+        command = "netstat -nr" if args.routing_info else "netstat"
         self.send_generic_command(command)
 
     @with_argparser(PARSERS.ps, preserve_quotes=True)
@@ -888,9 +881,15 @@ class RTRPrompt(Cmd):
             )
 
             self.poutput(
-                Style.BRIGHT + "File Size: " + Style.RESET_ALL +
-                str(put_file['size']) + " bytes"
+                (
+                    (
+                        f"{Style.BRIGHT}File Size: {Style.RESET_ALL}"
+                        + str(put_file['size'])
+                    )
+                    + " bytes"
+                )
             )
+
             if 'description' in put_file:
                 self.poutput(
                     Style.RESET_ALL + put_file['description']
@@ -923,11 +922,7 @@ class RTRPrompt(Cmd):
     @with_argparser(PARSERS.rm, preserve_quotes=True)
     def do_rm(self, args):
         """Remove (delete) a file or directory."""
-        if args.force:
-            command = f'rm {args.path} -Force'
-        else:
-            command = f'rm {args.path}'
-
+        command = f'rm {args.path} -Force' if args.force else f'rm {args.path}'
         self.send_generic_command(command)
 
     @with_argparser(PARSERS.run, preserve_quotes=False)

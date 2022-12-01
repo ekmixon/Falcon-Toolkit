@@ -30,9 +30,10 @@ CLOUDS = {
 
 def cloud_choice() -> str:
     """Configure a selection of clouds and allow the user to choose one via pick."""
-    cloud_choices: List[pick.Option] = []
-    for cloud_id, cloud_description in CLOUDS.items():
-        cloud_choices.append(pick.Option(cloud_description, cloud_id))
+    cloud_choices: List[pick.Option] = [
+        pick.Option(cloud_description, cloud_id)
+        for cloud_id, cloud_description in CLOUDS.items()
+    ]
 
     chosen_option, _ = pick.pick(cloud_choices, title="Please choose a Falcon cloud")
     chosen_falcon_cloud: str = chosen_option.value
@@ -64,10 +65,9 @@ def advanced_options_wizard() -> AdvancedOptionsType:
     ssl_verify: bool = chosen_ssl_verify.value
 
     proxy_dict = None
-    proxy_url_input = fancy_input("HTTPS proxy URL (leave blank if not needed): ", loop=False)
-
-    if proxy_url_input:
+    if proxy_url_input := fancy_input(
+        "HTTPS proxy URL (leave blank if not needed): ", loop=False
+    ):
         proxy_dict = {'https', proxy_url_input}
 
-    advanced_options_result = AdvancedOptionsType(cloud_name, ssl_verify, proxy_dict)
-    return advanced_options_result
+    return AdvancedOptionsType(cloud_name, ssl_verify, proxy_dict)

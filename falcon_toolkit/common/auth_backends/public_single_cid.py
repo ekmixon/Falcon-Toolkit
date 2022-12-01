@@ -70,21 +70,21 @@ class PublicCloudSingleCIDBackend(AuthBackend):
         Note that we do not return the Client Secret, as that is always stored away safely by
         keyring.
         """
-        config: Dict[str, object] = {}
-        config['client_id'] = self.client_id
-        config['cloud_name'] = self.cloud_name
-        config['ssl_verify'] = self.ssl_verify
-        config['proxy'] = self.proxy
+        config: Dict[str, object] = {
+            'client_id': self.client_id,
+            'cloud_name': self.cloud_name,
+            'ssl_verify': self.ssl_verify,
+            'proxy': self.proxy,
+        }
 
         return config
 
     def authenticate(self) -> Client:
         """Log the Toolkit into Falcon using the settings and keys configured at instance setup."""
-        client = Client(
+        return Client(
             client_id=self.client_id,
             client_secret=self.client_secret,
             cloud_name=self.cloud_name,
             ssl_verify=self.ssl_verify,
             proxy=self.proxy,
         )
-        return client

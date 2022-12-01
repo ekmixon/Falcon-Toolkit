@@ -44,7 +44,7 @@ def parse_cli_filters(filter_kv_strings: List[str], client: Client) -> FalconFil
         if '=' not in filter_kv_string:
             raise ValueError("Filter key=value string is in the wrong format")
         first_equals = filter_kv_string.index("=")
-        filter_key = filter_kv_string[0:first_equals]
+        filter_key = filter_kv_string[:first_equals]
         filter_value = filter_kv_string[first_equals + 1:]
         filters.create_new_filter_from_kv_string(filter_key, filter_value)
 

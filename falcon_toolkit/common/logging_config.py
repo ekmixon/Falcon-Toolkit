@@ -42,7 +42,7 @@ def configure_logger(
         log_filename_base = f"FalconToolkit_{timestamp_str}"
 
     log_filepath_base = os.path.join(log_path, log_filename_base)
-    log_filepath = log_filepath_base + ".log"
+    log_filepath = f"{log_filepath_base}.log"
     if log_compression:
         log_filepath += ".gz"
         # Gzip compress the main log file on the fly via a memory stream.

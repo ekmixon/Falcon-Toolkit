@@ -29,13 +29,10 @@ def _reg_query_builder(args: Namespace) -> str:
     if args.value and not args.subkey:
         raise CommandBuilderException("You must specify a value name, type and data together")
 
-    if args.subkey and args.value:
+    if args.value:
         return f'reg query {args.subkey} {args.value}'
 
-    if args.subkey and not args.value:
-        return f'reg query {args.subkey}'
-
-    return 'reg query'
+    return f'reg query {args.subkey}' if args.subkey else 'reg query'
 
 
 def _reg_set_builder(args: Namespace) -> str:

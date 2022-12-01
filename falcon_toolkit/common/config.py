@@ -55,23 +55,24 @@ class FalconInstanceConfig:
 
         auth_backend_name = auth.get("backend_name")
 
-        # Find the authentication backend with a matching simple_name
-        matching_auth_backend = None
-        for auth_backend in AUTH_BACKENDS:
-            if auth_backend.simple_name == auth_backend_name:
-                matching_auth_backend = auth_backend
-                break
+        matching_auth_backend = next(
+            (
+                auth_backend
+                for auth_backend in AUTH_BACKENDS
+                if auth_backend.simple_name == auth_backend_name
+            ),
+            None,
+        )
 
         if not matching_auth_backend:
             raise ValueError(
                 f"Auth backend {auth_backend_name} is not loaded or does not exist"
             )
 
-        auth_backend_config = auth.get("backend_config")
-        if not auth_backend_config:
+        if auth_backend_config := auth.get("backend_config"):
+            self.auth_backend = matching_auth_backend(config=auth_backend_config)
+        else:
             raise KeyError("Auth backend configuration is empty")
-
-        self.auth_backend = matching_auth_backend(config=auth_backend_config)
 
     def dump_config(self):
         """Return a dictionary representing the data required to store the instance config."""
@@ -153,9 +154,7 @@ class FalconToolkitConfig:
             auth_backend: AuthBackend = AUTH_BACKENDS[0]
         else:
             print("Please choose an authentication backend from the following list: ")
-            i = 0
-            for backend_option in AUTH_BACKENDS:
-                i += 1
+            for i, backend_option in enumerate(AUTH_BACKENDS, start=1):
                 print(
                     f"{Fore.GREEN}"
                     f"{Style.BRIGHT}[{i}]{Style.NORMAL} "

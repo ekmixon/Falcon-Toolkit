@@ -81,11 +81,12 @@ class PublicCloudFlightControlParentCIDBackend(AuthBackend):
         Note that we do not return the Client Secret, as that is always stored away safely by
         keyring.
         """
-        config: Dict[str, object] = {}
-        config['client_id']: str = self.client_id
-        config['cloud_name']: str = self.cloud_name
-        config['ssl_verify']: bool = self.ssl_verify
-        config['proxy']: Dict[str, str] = self.proxy
+        config: Dict[str, object] = {
+            'client_id': self.client_id,
+            'cloud_name': self.cloud_name,
+            'ssl_verify': self.ssl_verify,
+            'proxy': self.proxy,
+        }
 
         return config
 
@@ -121,7 +122,7 @@ class PublicCloudFlightControlParentCIDBackend(AuthBackend):
         chosen_cid_name = chosen_cid['name']
         print(f"Connecting to {chosen_cid_name}")
 
-        client = Client(
+        return Client(
             client_id=self.client_id,
             client_secret=self.client_secret,
             cloud_name=self.cloud_name,
@@ -129,4 +130,3 @@ class PublicCloudFlightControlParentCIDBackend(AuthBackend):
             ssl_verify=self.ssl_verify,
             proxy=self.proxy,
         )
-        return client
