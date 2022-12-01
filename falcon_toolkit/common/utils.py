@@ -60,7 +60,4 @@ def filename_safe_string(unsafe_string: str) -> str:
         [c for c in unsafe_string if c.isalpha() or c.isdigit() or c == ' ']
     ).rstrip()
 
-    # Replace spaces with underscores to match the general format of the log filename
-    clean_string = safe_string.replace(' ', '_')
-
-    return clean_string
+    return safe_string.replace(' ', '_')

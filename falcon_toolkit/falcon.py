@@ -120,11 +120,7 @@ def cli(
     config_path = os.path.expanduser(config_path)
     hyperlink = build_file_hyperlink(config_path, config_path, "falcon_config_path")
     click.echo(click.style(f"Configuration Directory: {hyperlink}", fg='black'))
-    if verbose:
-        log_level = logging.INFO
-    else:
-        log_level = logging.CRITICAL
-
+    log_level = logging.INFO if verbose else logging.CRITICAL
     # Configure and load the configuration object
     configure_data_dir(config_path)
     config = FalconToolkitConfig(config_path=config_path)
